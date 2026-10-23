@@ -1,31 +1,21 @@
-import { StyleSheet, View } from 'react-native';
-import { AppText, Icon, IconName } from '@/components/ui';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { AppText, Icon } from '@/components/ui';
 import { colors } from '@/theme';
-import { AppNotification, NotificationKind } from '@/types';
-
-const kindMeta: Record<NotificationKind, { icon: IconName; bg: string }> = {
-  request: { icon: 'car-arrow-right', bg: '#f59e0b' },
-  reminder: { icon: 'car-clock', bg: '#f59e0b' },
-  passengerMessage: { icon: 'message-processing-outline', bg: '#eab308' },
-  passengerArrived: { icon: 'flag-outline', bg: '#06b6d4' },
-  completed: { icon: 'map-marker-check-outline', bg: '#16a34a' },
-  payout: { icon: 'credit-card-check-outline', bg: '#16a34a' },
-  rating: { icon: 'star-outline', bg: '#8b5cf6' },
-  cancelled: { icon: 'close-circle-outline', bg: '#ef4444' },
-};
+import { AppNotification } from '@/types';
+import { kindMeta } from '../meta';
 
 /** Renders the body with the journey id picked out in bold white. */
 function Body({ text, highlight }: { text: string; highlight?: string }) {
   if (!highlight || !text.includes(highlight)) {
     return (
-      <AppText variant="body" color="textMuted">
+      <AppText variant="body" color="textMuted" numberOfLines={2}>
         {text}
       </AppText>
     );
   }
   const [before, after] = text.split(highlight);
   return (
-    <AppText variant="body" color="textMuted">
+    <AppText variant="body" color="textMuted" numberOfLines={2}>
       {before}
       <AppText variant="bodyStrong">{highlight}</AppText>
       {after}
@@ -33,10 +23,19 @@ function Body({ text, highlight }: { text: string; highlight?: string }) {
   );
 }
 
-export function NotificationItem({ item, last }: { item: AppNotification; last?: boolean }) {
+interface Props {
+  item: AppNotification;
+  last?: boolean;
+  onPress: (item: AppNotification) => void;
+}
+
+export function NotificationItem({ item, last, onPress }: Props) {
   const meta = kindMeta[item.kind];
   return (
-    <View style={[styles.row, !last && styles.divider]}>
+    <Pressable
+      onPress={() => onPress(item)}
+      style={({ pressed }) => [styles.row, !last && styles.divider, pressed && { opacity: 0.7 }]}
+    >
       <View style={[styles.icon, { backgroundColor: meta.bg }]}>
         <Icon name={meta.icon} size={30} color="#fff" />
       </View>
@@ -52,7 +51,7 @@ export function NotificationItem({ item, last }: { item: AppNotification; last?:
         </AppText>
         {item.unread ? <View style={styles.dot} /> : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
